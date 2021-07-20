@@ -15,7 +15,7 @@ volatile是java最轻量级的同步机制。
 
 ##### java内存模型：
 
-![image](img/16.png)
+![image](../img/16.png)
 
 [深入分析volatile的实现原理](https://mp.weixin.qq.com/s/mcR8_FHHGA2zb0aW1N02ag?from=groupmessage&isappinstalled=0)
 
@@ -79,8 +79,8 @@ java8编译会检查，如果是修改常量，会编译失败。
 * 声明类
 	
 #### 5.transient
-	
+
 如果一个对象中的某个属性不希望被序列化，则可以使用transient关键字进行声明。
 
 
-	
+​	

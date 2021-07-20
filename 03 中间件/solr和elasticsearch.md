@@ -55,3 +55,6 @@ Solr 是传统搜索应用的有力解决方案，但 Elasticsearch 更适用于
 两者对比更详细介绍请看如下文章：
 
 http://www.cnblogs.com/chowmin/articles/4629220.html
+
+
+

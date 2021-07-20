@@ -4,17 +4,16 @@
 
 #### 一、Log4
 
-Log4j是Apache的一个开源项目，它允许开发者以任意间隔输出日志信息.。主要分为两部分：一是appender，是输出日志的方式；二是logger，是具体日志输出器
+Log4j是Apache的一个开源项目，它允许开发者以任意间隔输出日志信息.。主要分为两部分：一是appender，是输出日志的方式；二是logger，是具体日志输出器。
 
 **1.Appender**
 
-　　其中，Log4j提供的appender有以下几种：
-　　
+其中，Log4j提供的appender有以下几种：
 
-* org.apache.log4j.ConsoleAppender（输出到控制台）
-* org.apache.log4j.FileAppender（输出到文件）
+* org.apache.log4j.ConsoleAppender（输出到控制台） -> <Console></Console>
+* org.apache.log4j.FileAppender（输出到文件）-> <XMDFile></XMDFile>
 * org.apache.log4j.DailyRollingFileAppender（每天产生一个日志文件）
-* org.apache.log4j.RollingFileAppender（文件到达指定大小的时候产生一个新的文件）
+* org.apache.log4j.RollingFileAppender（文件到达指定大小的时候产生一个新的文件） -> <RollingRandomAccessFile></RollingRandomAccessFile>
 * org.apache.log4j.WriterAppender（将日志信息以流格式发送到任意指定的地方）
 
 例如：
@@ -57,8 +56,6 @@ Log4j是Apache的一个开源项目，它允许开发者以任意间隔输出日
 * org.apache.log4j.SimpleLayout（包含日志信息的级别和信息字符串）
 * org.apache.log4j.TTCCLayout（包含日志产生的时间、线程、类别等等信息）
 
-
-
 **格式化日志信息Log4J采用类似C语言中的printf函数的打印格式格式化日志信息，打印参数如下：**
 
 * %m 输出代码中指定的消息
@@ -69,6 +66,18 @@ Log4j是Apache的一个开源项目，它允许开发者以任意间隔输出日
 * %n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
 * %d 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，比如：%d{yyyy MMM ddHH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
 * %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数。
+
+**Scribe可以使用作为通用的缓冲队列系统，进行日志的收集并存储到存储后端**
+
+![image-20210714150517579](/Users/alburtams/Library/Application Support/typora-user-images/image-20210714150517579.png)
+
+
+
+- 写入一个本地守护进程（Scribed），该守护进程负责最终将日志发送到存储后端；
+- 直接写入后端服务器的远程层（写入服务）；
+- 最后，消费者可以连接一个读取服务，通过流式方式读取日志（比如某团的kafka消息订阅，将日志信息同步到远程的日志中心ES集群上）。
+
+**CAT**是美团开源的一款比较好的业务性能监控的工具，CatClient会异步的将信息上报到CAT服务端，服务端可以将数据集成到ES然后使用Kibana做视图的渲染。
 
 **2.Logger**
 
@@ -92,8 +101,13 @@ Log4j中有一个根日志器
 </logger>
 ```
 
-根据继承原则得到这个logger的level是INFO，appender是ConsoleAppenderA、PROJECT、EXCEPTION_LOG。
-也可以使logger不继承其他logger，使用additivity="false"
+**<logger>用来设置某一个包或者具体某一个类的日志打印级别、以及指定<appender>**。<logger>可以包含零个或者多个<appender-ref>元素，标识这个appender将会添加到这个logger。<logger>仅有一个name属性、一个可选的level属性和一个可选的additivity属性：
+
+- name：用来指定受此logger约束的某一个包或者具体的某一个类；
+- level：用来设置打印级别，五个常用打印级别从低至高依次为TRACE、DEBUG、INFO、WARN、ERROR，如果未设置此级别，那么当前logger会继承上级的级别；
+- additivity：是否向上级logger传递打印信息，默认为true。
+
+根据继承原则得到这个logger的level是INFO，appender是ConsoleAppenderA、PROJECT、EXCEPTION_LOG。也可以使logger不继承其他logger，使用additivity="false"
 
 ```
 <logger name="com.alibaba.china.pylon.enhancedmit.domain.Handler" additivity="false">
@@ -109,7 +123,6 @@ Log4j常用的四个级别，优先级从高到低分别是ERROR、WARN、INFO�
 ALL：打印所有的日志，OFF：关闭所有的日志输出。 
 appender-ref属性即使用logger引用之前配置过的appender。
 
-
 **在程序中怎么创建logger，并调用呢？**
 
 ```
@@ -122,7 +135,7 @@ logger.warn("Just testinga log message with priority set to WARN");
 logger.error("Justtesting a log message with priority set to ERROR");
 logger.fatal("Justtesting a log message with priority set to FATAL");
 ```
- 
+
 另外，logger对name的前缀默认也有继承性，例：
 
 ```
@@ -135,8 +148,8 @@ logger.fatal("Justtesting a log message with priority set to FATAL");
     <level value="INFO"/>
     <appender-ref ref="FileAppenderA"/>
  </logger>
- ````
- 
+````
+
 根据继承原则名为com.alibaba.service.VelocityService的logger的appender是FileAppenderA和ConsoleAppenderA，level的为INFO。
 
 
